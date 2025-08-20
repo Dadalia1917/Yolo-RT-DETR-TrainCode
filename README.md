@@ -107,7 +107,7 @@ pip install sqlalchemy flask_bcrypt flask_login
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/Dadalia1917/Yolo-RT-DETR-Train-Code.git
+git clone https://github.com/Dadalia1917/Yolo-RT-DETR-TrainCode.git
 cd Yolo-RT-DETR-Train-Code
 ```
 
