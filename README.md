@@ -130,11 +130,6 @@ datasets/
 
 #### 使用命令行训练
 
-**训练YOLOv8：**
-```bash
-python MainProgram_yolo.py
-```
-
 **训练RT-DETR：**
 ```bash
 python MainProgram_RTDETR.py
