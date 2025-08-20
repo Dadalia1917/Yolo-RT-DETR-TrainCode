@@ -23,4 +23,5 @@ if __name__ == '__main__':
                           batch=12,  # 批次大小
                           name='train_rtdetr_x',  # 设置训练结果的文件夹名称
                           workers=16,  # 调整数据加载线程数
-                          optimizer='SGD')
+                          optimizer='SGD',  # 使用SGD优化器，通常比Adam获得更好的最终精度
+                          amp=True)  # 启用自动混合精度训练，加速训练并节省显存
