@@ -3,7 +3,7 @@ import torch
 from ultralytics import YOLO
 
 # 模型配置文件
-model_yaml_path = "ultralytics/cfg/models/v13/yolov13.yaml"
+model_yaml_path = "ultralytics/cfg/models/v13/yolo13.yaml"
 # 数据集配置文件
 data_yaml_path = 'datasets/Data/data.yaml'
 # 预训练模型
@@ -18,9 +18,10 @@ if __name__ == '__main__':
 
     # 训练模型
     results = model.train(data=data_yaml_path,
-                          epochs=150,
-                          batch=4,  # 批次大小
+                          epochs=300,
+                          batch=8,  # 批次大小
+                          project='runs/detect',  # 指定保存到当前项目的runs/detect目录
                           name='train_v13',
-                          workers=4,  # 调整数据加载线程数
+                          workers=8,  # 调整数据加载线程数
                           optimizer='SGD',  # 使用SGD优化器，通常比Adam获得更好的最终精度
                           amp=True)  # 启用自动混合精度训练，加速训练并节省显存

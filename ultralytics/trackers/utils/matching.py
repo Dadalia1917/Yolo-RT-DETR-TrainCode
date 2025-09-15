@@ -17,7 +17,7 @@ except (ImportError, AssertionError, AttributeError):
     import lap
 
 
-def linear_assignment(cost_matrix: np.ndarray, thresh: float, use_lap: bool = True) -> tuple:
+def linear_assignment(cost_matrix: np.ndarray, thresh: float, use_lap: bool = True):
     """
     Perform linear assignment using either the scipy or lap.lapjv method.
 
@@ -55,8 +55,8 @@ def linear_assignment(cost_matrix: np.ndarray, thresh: float, use_lap: bool = Tr
             unmatched_a = list(np.arange(cost_matrix.shape[0]))
             unmatched_b = list(np.arange(cost_matrix.shape[1]))
         else:
-            unmatched_a = list(set(np.arange(cost_matrix.shape[0])) - set(matches[:, 0]))
-            unmatched_b = list(set(np.arange(cost_matrix.shape[1])) - set(matches[:, 1]))
+            unmatched_a = list(frozenset(np.arange(cost_matrix.shape[0])) - frozenset(matches[:, 0]))
+            unmatched_b = list(frozenset(np.arange(cost_matrix.shape[1])) - frozenset(matches[:, 1]))
 
     return matches, unmatched_a, unmatched_b
 
@@ -70,7 +70,7 @@ def iou_distance(atracks: list, btracks: list) -> np.ndarray:
         btracks (list[STrack] | list[np.ndarray]): List of tracks 'b' or bounding boxes.
 
     Returns:
-        (np.ndarray): Cost matrix computed based on IoU.
+        (np.ndarray): Cost matrix computed based on IoU with shape (len(atracks), len(btracks)).
 
     Examples:
         Compute IoU distance between two sets of tracks
@@ -133,7 +133,7 @@ def embedding_distance(tracks: list, detections: list, metric: str = "cosine") -
 
 def fuse_score(cost_matrix: np.ndarray, detections: list) -> np.ndarray:
     """
-    Fuses cost matrix with detection scores to produce a single similarity matrix.
+    Fuse cost matrix with detection scores to produce a single similarity matrix.
 
     Args:
         cost_matrix (np.ndarray): The matrix containing cost values for assignments, with shape (N, M).
