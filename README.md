@@ -25,7 +25,6 @@
 - **RT-DETR** (Real-Time Detection with Vision Transformers)
 - **YOLOv8** 系列模型
 - **YOLOv9-v13** 最新系列模型
-- **YOLO11-12** 最新版本
 
 项目提供了完整的训练、验证、测试和部署解决方案，适用于各种目标检测任务。
 
