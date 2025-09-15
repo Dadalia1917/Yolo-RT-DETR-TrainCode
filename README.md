@@ -131,7 +131,7 @@ datasets/
 
 **训练RT-DETR：**
 ```bash
-python MainProgram_RTDETR.py
+python train_rtdetr.py
 ```
 
 **训练不同版本的YOLO：**
@@ -212,7 +212,7 @@ python prediction.py --model path/to/your/model.pt --source path/to/your/image
 ```python
 # 基本训练参数
 epochs = 300              # 训练轮数
-batch_size = 16          # 批次大小
+batch_size = 8          # 批次大小
 learning_rate = 0.01     # 学习率
 img_size = 640           # 输入图像尺寸
 

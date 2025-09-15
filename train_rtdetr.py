@@ -22,7 +22,7 @@ if __name__ == '__main__':
                           epochs=300,
                           batch=8,  # 批次大小
                           project='runs/detect',  # 指定保存到当前项目的runs/detect目录
-                          name='train_rtdetr_x',
+                          name='train_rtdetr',
                           workers=8,  # 调整数据加载线程数
                           optimizer='SGD',  # 使用SGD优化器，通常比Adam获得更好的最终精度
                           amp=True)  # 启用自动混合精度训练，加速训练并节省显存
