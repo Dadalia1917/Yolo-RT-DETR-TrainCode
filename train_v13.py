@@ -19,6 +19,7 @@ if __name__ == '__main__':
     # 训练模型
     results = model.train(data=data_yaml_path,
                           epochs=300,
+                          imgsz=640,
                           batch=16,  # 批次大小
                           name='train_v13',
                           workers=10,  # 调整数据加载线程数，匹配14核CPU

@@ -19,6 +19,7 @@ if __name__ == '__main__':
     # 训练模型
     results = model.train(data=data_yaml_path,
                           epochs=300,
+                          imgsz=640,
                           batch=16,  # 批次大小
                           project='runs/detect',  # 指定保存到当前项目的runs/detect目录
                           name='train_v8',
