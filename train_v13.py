@@ -18,7 +18,7 @@ if __name__ == '__main__':
     device = '0'  # Ultralytics框架接受字符串形式的设备ID
 
     # 直接加载预训练模型，而不是先加载yaml再加载权重
-    model = RTDETR(pre_model_name)
+    model = YOLO(pre_model_name)
 
     # 训练模型
     results = model.train(data=data_yaml_path,
