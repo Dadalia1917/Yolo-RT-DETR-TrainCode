@@ -13,8 +13,12 @@ if __name__ == '__main__':
     # 检查是否有GPU可用
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    # 注意：通常cuda:0是第一块卡，cuda:1是第二块卡
+    # 可以通过 nvidia-smi 确认GPU索引
+    device = '0'  # Ultralytics框架接受字符串形式的设备ID
+
     # 直接加载预训练模型，而不是先加载yaml再加载权重
-    model = RTDETR(pre_model_name).to(device)
+    model = RTDETR(pre_model_name)
 
     # 训练模型
     results = model.train(data=data_yaml_path,
