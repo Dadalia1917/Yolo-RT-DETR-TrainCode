@@ -7,7 +7,7 @@ model_yaml_path = "ultralytics/cfg/models/v8/yolov8.yaml"
 # 数据集配置文件
 data_yaml_path = 'datasets/Data/data.yaml'
 # 预训练模型
-pre_model_name = 'yolo8n.pt'
+pre_model_name = 'yolov8n.pt'
 
 if __name__ == '__main__':
     # 检查是否有GPU可用
