@@ -1,6 +1,6 @@
 ---
 comments: true
-description: Comprehensive reference for the Explorer API. Get a brief description of all the main classes utilised for creating and handling the data in the Ultralytics data explorer project.
+description: Comprehensive reference for the Explorer API. Get a brief description of all the main classes utilized for creating and handling the data in the Ultralytics data explorer project.
 keywords: Ultralytics, explorer.py, data explorer, Semantic search, vector similarity search, class reference, documentation, ExplorerDataset, Explorer, data handling
 ---
 
