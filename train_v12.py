@@ -1,9 +1,12 @@
 # coding:utf-8
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+
 import torch
 from ultralytics import YOLO
 
 # 模型配置文件
-model_yaml_path = "ultralytics/cfg/models/v12/yolov12.yaml"
+model_yaml_path = "ultralytics/cfg/models/v12/yolo12.yaml"
 # 数据集配置文件
 data_yaml_path = 'datasets/Data/data.yaml'
 # 预训练模型
@@ -29,4 +32,5 @@ if __name__ == '__main__':
                           name='train_v12',
                           workers=10,  # 调整数据加载线程数，匹配14核CPU
                           optimizer='SGD',  # 使用SGD优化器，通常比Adam获得更好的最终精度
-                          amp=True)  # 启用自动混合精度训练，加速训练并节省显存
+                          amp=True,  # 启用自动混合精度训练，加速训练并节省显存
+                          device=device)  # 指定使用的GPU设备

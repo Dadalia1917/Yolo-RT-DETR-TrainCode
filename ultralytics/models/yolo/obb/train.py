@@ -12,15 +12,14 @@ from ultralytics.utils import DEFAULT_CFG, RANK
 
 
 class OBBTrainer(yolo.detect.DetectionTrainer):
-    """
-    A class extending the DetectionTrainer class for training based on an Oriented Bounding Box (OBB) model.
+    """A class extending the DetectionTrainer class for training based on an Oriented Bounding Box (OBB) model.
 
-    This trainer specializes in training YOLO models that detect oriented bounding boxes, which are useful for
-    detecting objects at arbitrary angles rather than just axis-aligned rectangles.
+    This trainer specializes in training YOLO models that detect oriented bounding boxes, which are useful for detecting
+    objects at arbitrary angles rather than just axis-aligned rectangles.
 
     Attributes:
-        loss_names (tuple): Names of the loss components used during training including box_loss, cls_loss,
-            and dfl_loss.
+        loss_names (tuple): Names of the loss components used during training including box_loss, cls_loss, and
+            dfl_loss.
 
     Methods:
         get_model: Return OBBModel initialized with specified config and weights.
@@ -34,14 +33,13 @@ class OBBTrainer(yolo.detect.DetectionTrainer):
     """
 
     def __init__(self, cfg=DEFAULT_CFG, overrides: dict | None = None, _callbacks: list[Any] | None = None):
-        """
-        Initialize an OBBTrainer object for training Oriented Bounding Box (OBB) models.
+        """Initialize an OBBTrainer object for training Oriented Bounding Box (OBB) models.
 
         Args:
-            cfg (dict, optional): Configuration dictionary for the trainer. Contains training parameters and
-                model configuration.
-            overrides (dict, optional): Dictionary of parameter overrides for the configuration. Any values here
-                will take precedence over those in cfg.
+            cfg (dict, optional): Configuration dictionary for the trainer. Contains training parameters and model
+                configuration.
+            overrides (dict, optional): Dictionary of parameter overrides for the configuration. Any values here will
+                take precedence over those in cfg.
             _callbacks (list[Any], optional): List of callback functions to be invoked during training.
         """
         if overrides is None:
@@ -52,8 +50,7 @@ class OBBTrainer(yolo.detect.DetectionTrainer):
     def get_model(
         self, cfg: str | dict | None = None, weights: str | Path | None = None, verbose: bool = True
     ) -> OBBModel:
-        """
-        Return OBBModel initialized with specified config and weights.
+        """Return OBBModel initialized with specified config and weights.
 
         Args:
             cfg (str | dict, optional): Model configuration. Can be a path to a YAML config file, a dictionary
@@ -76,7 +73,7 @@ class OBBTrainer(yolo.detect.DetectionTrainer):
 
     def get_validator(self):
         """Return an instance of OBBValidator for validation of YOLO model."""
-        self.loss_names = "box_loss", "cls_loss", "dfl_loss"
+        self.loss_names = "box_loss", "cls_loss", "dfl_loss", "angle_loss"
         return yolo.obb.OBBValidator(
             self.test_loader, save_dir=self.save_dir, args=copy(self.args), _callbacks=self.callbacks
         )
