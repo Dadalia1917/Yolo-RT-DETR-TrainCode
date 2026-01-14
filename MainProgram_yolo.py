@@ -1,40 +1,44 @@
-import time
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QHeaderView, QTableWidgetItem, QAbstractItemView
-import sys
 import os
-from PIL import ImageFont
+import sys
+import time
+
+from PyQt5.QtWidgets import QAbstractItemView, QApplication, QFileDialog, QHeaderView, QMainWindow, QTableWidgetItem
+
 from ultralytics import YOLO
-sys.path.append('UIProgram')
-from UIProgram.UiMain import Ui_MainWindow
-from PyQt5.QtCore import QTimer, Qt
-import detect_tools as tools
-import cv2
-import Config2
-from UIProgram.QssLoader import QSSLoader
-import numpy as np
-import torch
-import warnings
+
+sys.path.append("UIProgram")
 import logging
+import warnings
 
-logging.basicConfig(filename='debug.log', level=logging.DEBUG)
+import cv2
+import torch
+from PyQt5.QtCore import Qt, QTimer
 
-warnings.filterwarnings('ignore', category=DeprecationWarning)
+import Config2
+import detect_tools as tools
+from UIProgram.QssLoader import QSSLoader
+from UIProgram.UiMain import Ui_MainWindow
+
+logging.basicConfig(filename="debug.log", level=logging.DEBUG)
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
-        super(MainWindow, self).__init__(parent)
+        super().__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.initMain()
         self.signalconnect()
 
         # Load css rendering effect
-        style_file = 'UIProgram/style.css'
+        style_file = "UIProgram/style.css"
         qssStyleSheet = QSSLoader.read_qss_file(style_file)
         self.setStyleSheet(qssStyleSheet)
 
         self.conf = 0.5
-        self.unkonwn_text = '无法识别'
+        self.unkonwn_text = "无法识别"
 
         # Video and camera detection frequency, detect once every 5 frames
         self.detection_frequency = 5
@@ -56,7 +60,7 @@ class MainWindow(QMainWindow):
         self.is_camera_open = False
         self.cap = None
 
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         # Load detection model
         self.model = YOLO("runs/detect/train_v13/weights/best.pt")
@@ -82,9 +86,9 @@ class MainWindow(QMainWindow):
         if self.cap:
             self.video_stop()
             self.is_camera_open = False
-            self.ui.CapBtn.setText('打开摄像头')
+            self.ui.CapBtn.setText("打开摄像头")
             self.cap = None
-        file_path, _ = QFileDialog.getOpenFileName(None, '打开图片', './', "Image files (*.jpg *.jpeg *.png *.bmp)")
+        file_path, _ = QFileDialog.getOpenFileName(None, "打开图片", "./", "Image files (*.jpg *.jpeg *.png *.bmp)")
         if not file_path:
             return
         self.org_path = file_path
@@ -114,11 +118,18 @@ class MainWindow(QMainWindow):
                     self.boxes.append((x1, y1, x2, y2, display_name, score))
                     # 绘制检测框和标签（保留英文）
                     cv2.rectangle(display_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                    cv2.putText(display_img, f"{en_cls}: {score:.2f}", (x1, y1 - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                    cv2.putText(
+                        display_img,
+                        f"{en_cls}: {score:.2f}",
+                        (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (0, 255, 0),
+                        2,
+                    )
 
         t2 = time.time()
-        take_time_str = '{:.3f} s'.format(t2 - t1)
+        take_time_str = f"{t2 - t1:.3f} s"
         self.ui.time_lb.setText(f"{take_time_str}")
 
         # 统计总目标数（所有类别）
@@ -144,7 +155,7 @@ class MainWindow(QMainWindow):
         self.ui.label_show.setAlignment(Qt.AlignCenter)
 
     def on_selection_change(self):
-        if not hasattr(self, 'org_img') or self.org_img is None:
+        if not hasattr(self, "org_img") or self.org_img is None:
             logging.debug("org_img is not defined.")
             return
 
@@ -163,8 +174,15 @@ class MainWindow(QMainWindow):
                 if label == selection_text:
                     # 高亮选中目标（保留英文标签）
                     cv2.rectangle(display_img, (x1, y1), (x2, y2), (255, 0, 255), 2)
-                    cv2.putText(display_img, f"{label}: {score:.2f}", (x1, y1 - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
+                    cv2.putText(
+                        display_img,
+                        f"{label}: {score:.2f}",
+                        (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (255, 0, 255),
+                        2,
+                    )
 
                     # 设置坐标信息
                     self.ui.xmin_lb.setText(str(x1))
@@ -174,7 +192,7 @@ class MainWindow(QMainWindow):
                     self.ui.confidence_lb.setText(f"{score:.2f}")
 
                     # 提取英文类别名 → 转换为中文
-                    en_cls = ''.join(filter(str.isalpha, label))  # 去除计数部分（如 vehicle1 → vehicle）
+                    en_cls = "".join(filter(str.isalpha, label))  # 去除计数部分（如 vehicle1 → vehicle）
                     ch_type = Config2.EN_to_CH.get(en_cls, "未知")  # 使用 Config 中的映射
                     self.ui.type_lb.setText(ch_type)
                     break
@@ -183,8 +201,9 @@ class MainWindow(QMainWindow):
             for box in self.boxes:
                 x1, y1, x2, y2, label, score = box
                 cv2.rectangle(display_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.putText(display_img, f"{label}: {score:.2f}", (x1, y1 - 10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                cv2.putText(
+                    display_img, f"{label}: {score:.2f}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2
+                )
 
         # 显示图片
         self.img_width, self.img_height = self.get_resize_size(display_img)
@@ -197,7 +216,7 @@ class MainWindow(QMainWindow):
         if self.cap:
             self.video_stop()
             self.is_camera_open = False
-            self.ui.CapBtn.setText('打开摄像头')
+            self.ui.CapBtn.setText("打开摄像头")
             self.cap = None
         directory = QFileDialog.getExistingDirectory(self, "选取文件夹", "./")
         if not directory:
@@ -206,12 +225,12 @@ class MainWindow(QMainWindow):
         self.ui.tableWidget.setRowCount(0)
         self.ui.tableWidget.clearContents()
         self.org_path = directory
-        img_suffix = ['jpg', 'png', 'jpeg', 'bmp']
+        img_suffix = ["jpg", "png", "jpeg", "bmp"]
         self.boxes_dict = {}
 
         for file_name in os.listdir(directory):
             full_path = os.path.join(directory, file_name)
-            if os.path.isfile(full_path) and file_name.split('.')[-1].lower() in img_suffix:
+            if os.path.isfile(full_path) and file_name.split(".")[-1].lower() in img_suffix:
                 img_path = full_path
                 org_img = tools.img_cvread(img_path).copy()
 
@@ -240,11 +259,18 @@ class MainWindow(QMainWindow):
                             boxes.append((x1, y1, x2, y2, display_name, score))
                             # 绘制中文标签
                             cv2.rectangle(display_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                            cv2.putText(display_img, f"{ch_cls}: {score:.2f}", (x1, y1 - 10),
-                                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                            cv2.putText(
+                                display_img,
+                                f"{ch_cls}: {score:.2f}",
+                                (x1, y1 - 10),
+                                cv2.FONT_HERSHEY_SIMPLEX,
+                                0.5,
+                                (0, 255, 0),
+                                2,
+                            )
 
                 t2 = time.time()
-                take_time_str = '{:.3f} s'.format(t2 - t1)
+                take_time_str = f"{t2 - t1:.3f} s"
                 self.ui.time_lb.setText(f"{take_time_str}")
 
                 self.ui.total_lb.setText(f"{car_count + person_count}")
@@ -286,7 +312,7 @@ class MainWindow(QMainWindow):
         self.ui.tableWidget.scrollToBottom()
 
     def get_video_path(self):
-        file_path, _ = QFileDialog.getOpenFileName(None, '打开视频', './', "Video files (*.avi *.mp4 *.wmv *.mkv)")
+        file_path, _ = QFileDialog.getOpenFileName(None, "打开视频", "./", "Video files (*.avi *.mp4 *.wmv *.mkv)")
         if not file_path:
             return None
         self.org_path = file_path
@@ -338,8 +364,9 @@ class MainWindow(QMainWindow):
 
                             # 绘制检测框和显示标签
                             cv2.rectangle(now_img, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
-                            cv2.putText(now_img, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color,
-                                        2)
+                            cv2.putText(
+                                now_img, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2
+                            )
 
                             target_count += 1  # 增加目标总数
 
@@ -347,7 +374,7 @@ class MainWindow(QMainWindow):
                     self.ui.total_lb.setText(f"{target_count}")
 
                     t2 = time.time()
-                    take_time_str = '{:.3f} s'.format(t2 - t1)
+                    take_time_str = f"{t2 - t1:.3f} s"
                     self.ui.time_lb.setText(take_time_str)
 
                 except Exception as e:
@@ -364,7 +391,7 @@ class MainWindow(QMainWindow):
             self.previous_frame = now_img
         else:
             logging.debug("No frame retrieved from the camera.")
-            if hasattr(self, 'previous_frame'):
+            if hasattr(self, "previous_frame"):
                 now_img = self.previous_frame
                 self.img_width, self.img_height = self.get_resize_size(now_img)
                 resize_cvimg = cv2.resize(now_img, (self.img_width, self.img_height))
@@ -380,7 +407,7 @@ class MainWindow(QMainWindow):
     def vedio_show(self):
         if self.is_camera_open:
             self.is_camera_open = False
-            self.ui.CapBtn.setText('打开摄像头')
+            self.ui.CapBtn.setText("打开摄像头")
 
         video_path = self.get_video_path()
         if not video_path:
@@ -391,12 +418,12 @@ class MainWindow(QMainWindow):
     def camera_show(self):
         self.is_camera_open = not self.is_camera_open
         if self.is_camera_open:
-            self.ui.CapBtn.setText('关闭摄像头')
+            self.ui.CapBtn.setText("关闭摄像头")
             self.cap = cv2.VideoCapture(0)
             self.video_start()
         else:
-            self.ui.CapBtn.setText('打开摄像头')
-            self.ui.label_show.setText('')
+            self.ui.CapBtn.setText("打开摄像头")
+            self.ui.label_show.setText("")
             if self.cap:
                 self.cap.release()
                 cv2.destroyAllWindows()
@@ -404,7 +431,7 @@ class MainWindow(QMainWindow):
 
     def get_resize_size(self, img):
         _img = img.copy()
-        img_height, img_width, depth = _img.shape
+        img_height, img_width, _depth = _img.shape
         ratio = img_width / img_height
         if ratio >= self.show_width / self.show_height:
             self.img_width = self.show_width
@@ -436,13 +463,14 @@ class MainWindow(QMainWindow):
 
             for box in self.boxes:
                 x1, y1, x2, y2, label, score = box
-                if 'car' in label:
+                if "car" in label:
                     car_count += 1
-                elif 'person' in label:
+                elif "person" in label:
                     person_count += 1
                 cv2.rectangle(display_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.putText(display_img, f"{label}: {score:.2f}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                            (0, 255, 0), 2)
+                cv2.putText(
+                    display_img, f"{label}: {score:.2f}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2
+                )
 
             self.ui.total_lb.setText(f"{car_count + person_count}")
             self.ui.pedestrians_lb.setText(f"{person_count}")
@@ -469,4 +497,3 @@ if __name__ == "__main__":
     win = MainWindow()
     win.show()
     sys.exit(app.exec_())
-
