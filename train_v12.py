@@ -28,7 +28,6 @@ if __name__ == '__main__':
                           epochs=300,
                           imgsz=640,
                           batch=16,  # 批次大小
-                          project='runs/detect',  # 指定保存到当前项目的runs/detect目录
                           name='train_v12',
                           workers=10,  # 调整数据加载线程数，匹配14核CPU
                           optimizer='SGD',  # 使用SGD优化器，通常比Adam获得更好的最终精度
