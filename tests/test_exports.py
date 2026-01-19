@@ -144,7 +144,9 @@ def test_export_coreml_matrix(task, dynamic, int8, half, nms, batch):
 
 
 @pytest.mark.slow
-@pytest.mark.skipif(not checks.IS_PYTHON_MINIMUM_3_10, reason="TFLite export requires Python>=3.10")
+@pytest.mark.skipif(
+    not checks.IS_PYTHON_MINIMUM_3_10 or not TORCH_1_13, reason="TFLite export requires Python>=3.10 and torch>=1.13"
+)
 @pytest.mark.skipif(
     not LINUX or IS_RASPBERRYPI,
     reason="Test disabled as TF suffers from install conflicts on Windows, macOS and Raspberry Pi",
@@ -238,7 +240,6 @@ def test_export_mnn_matrix(task, int8, half, batch):
 
 
 @pytest.mark.slow
-@pytest.mark.skipif(ARM64, reason="NCNN not supported on ARM64")  # https://github.com/Tencent/ncnn/issues/6509
 @pytest.mark.skipif(not TORCH_2_0, reason="NCNN inference causes segfault on PyTorch<2.0")
 def test_export_ncnn():
     """Test YOLO export to NCNN format."""
@@ -247,7 +248,6 @@ def test_export_ncnn():
 
 
 @pytest.mark.slow
-@pytest.mark.skipif(ARM64, reason="NCNN not supported on ARM64")  # https://github.com/Tencent/ncnn/issues/6509
 @pytest.mark.skipif(not TORCH_2_0, reason="NCNN inference causes segfault on PyTorch<2.0")
 @pytest.mark.parametrize("task, half, batch", list(product(TASKS, [True, False], [1])))
 def test_export_ncnn_matrix(task, half, batch):
