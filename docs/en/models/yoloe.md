@@ -8,7 +8,7 @@ keywords: YOLOE, open-vocabulary detection, real-time object detection, instance
 
 ## Introduction
 
-![YOLOE Prompting Options](https://github.com/ultralytics/docs/releases/download/0/yoloe-visualization.avif)
+![YOLOE Prompting Options](https://cdn.jsdelivr.net/gh/ultralytics/assets@main/docs/yoloe-visualization.avif)
 
 [YOLOE (Real-Time Seeing Anything)](https://arxiv.org/html/2503.07465v1) is a new advancement in zero-shot, promptable YOLO models, designed for **open-vocabulary** detection and segmentation. Unlike previous YOLO models limited to fixed categories, YOLOE uses text, image, or internal vocabulary prompts, enabling real-time detection of any object class. Built upon YOLOv10 and inspired by [YOLO-World](yolo-world.md), YOLOE achieves **state-of-the-art zero-shot performance** with minimal impact on speed and accuracy.
 
@@ -260,8 +260,7 @@ YOLOE supports both text-based and visual prompting. Using prompts is straightfo
         model = YOLOE("yoloe-26l-seg.pt")  # or yoloe-26s/m-seg.pt for different sizes
 
         # Set text prompt to detect person and bus. You only need to do this once after you load the model.
-        names = ["person", "bus"]
-        model.set_classes(names, model.get_text_pe(names))
+        model.set_classes(["person", "bus"])
 
         # Run detection on the given image
         results = model.predict("path/to/image.jpg")
@@ -492,8 +491,7 @@ The export process is similar to other YOLO models, with the added flexibility o
     model = YOLOE("yoloe-26l-seg.pt")
 
     # Configure the set_classes() before exporting the model
-    names = ["person", "bus"]
-    model.set_classes(names, model.get_text_pe(names))
+    model.set_classes(["person", "bus"])
 
     export_model = model.export(format="onnx")
     model = YOLOE(export_model)
@@ -541,6 +539,7 @@ The export process is similar to other YOLO models, with the added flexibility o
         from ultralytics import YOLOE
         from ultralytics.models.yolo.yoloe import YOLOESegTrainerFromScratch
 
+        # Option 1: Use Python dictionary
         data = dict(
             train=dict(
                 yolo_data=["Objects365.yaml"],
@@ -558,9 +557,22 @@ The export process is similar to other YOLO models, with the added flexibility o
             val=dict(yolo_data=["lvis.yaml"]),
         )
 
+        # Option 2: Use YAML file (yoloe_data.yaml)
+        # train:
+        #   yolo_data:
+        #     - Objects365.yaml
+        #   grounding_data:
+        #     - img_path: flickr/full_images/
+        #       json_file: flickr/annotations/final_flickr_separateGT_train_segm.json
+        #     - img_path: mixed_grounding/gqa/images
+        #       json_file: mixed_grounding/annotations/final_mixed_train_no_coco_segm.json
+        # val:
+        #   yolo_data:
+        #     - lvis.yaml
+
         model = YOLOE("yoloe-26l-seg.yaml")
         model.train(
-            data=data,
+            data=data,  # or data="yoloe_data.yaml" if using YAML file
             batch=128,
             epochs=30,
             close_mosaic=2,
@@ -910,8 +922,7 @@ Quickly set up YOLOE with Ultralytics by following these steps:
         from ultralytics import YOLO
 
         model = YOLO("yoloe-26s-seg.pt")
-        names = ["bowl", "apple"]
-        model.set_classes(names, model.get_text_pe(names))
+        model.set_classes(["bowl", "apple"])
         results = model.predict("kitchen.jpg")
         results[0].save()
         ```
@@ -985,8 +996,7 @@ from ultralytics import YOLO
 model = YOLO("yoloe-26s-seg.pt")
 
 # Define custom classes
-names = ["person", "bus"]
-model.set_classes(names, model.get_text_pe(names))
+model.set_classes(["person", "bus"])
 
 # Execute prediction on an image
 results = model.predict("path/to/image.jpg")
