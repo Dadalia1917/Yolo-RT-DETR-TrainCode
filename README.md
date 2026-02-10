@@ -255,7 +255,6 @@ model.export(format='engine')
 ## 📞 联系方式
 
 - GitHub Issues: [提交问题](https://github.com/Dadalia1917/Yolo-RT-DETR-Train-Code/issues)
-- 项目作者: 张金翔
 
 ---
 
