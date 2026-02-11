@@ -1,8 +1,10 @@
-from ..yolo import YOLO
 from ultralytics.nn.tasks import YOLOv10DetectionModel
-from .val import YOLOv10DetectionValidator
+
+from ..yolo import YOLO
 from .predict import YOLOv10DetectionPredictor
 from .train import YOLOv10DetectionTrainer
+from .val import YOLOv10DetectionValidator
+
 
 class YOLOv10(YOLO):
     @property
