@@ -1,14 +1,27 @@
-
 QGroupBox {
-    border: 2px solid gray;
-    }
+  border: 2px solid gray;
+}
 
-QPushButton{color:black}
-QPushButton{background-color:rgb(0,153,204)}
-QPushButton:hover{color:red}
-QPushButton{border-radius:6px}
-QPushButton:pressed{background-color:rgb(180,180,180);border: None;}
+QPushButton {
+  color: black;
+}
+QPushButton {
+  background-color: rgb(0, 153, 204);
+}
+QPushButton:hover {
+  color: red;
+}
+QPushButton {
+  border-radius: 6px;
+}
+QPushButton:pressed {
+  background-color: rgb(180, 180, 180);
+  border: None;
+}
 
-
-#MainWindow{border-image:url(UIProgram/ui_imgs/bg11.jpg)}
-QLabel#label_show{border-image:url(UIProgram/ui_imgs/12.jpg);}
+#MainWindow {
+  border-image: url(UIProgram/ui_imgs/bg11.jpg);
+}
+QLabel#label_show {
+  border-image: url(UIProgram/ui_imgs/12.jpg);
+}
