@@ -44,8 +44,8 @@ class Tuner:
         space (dict[str, tuple]): Hyperparameter search space containing bounds and scaling factors for mutation.
         tune_dir (Path): Directory where evolution logs and results will be saved.
         tune_csv (Path): Path to the CSV file where evolution logs are saved.
-        args (dict): Configuration arguments for the tuning process.
-        callbacks (list): Callback functions to be executed during tuning.
+        args (SimpleNamespace): Configuration arguments for the tuning process.
+        callbacks (dict): Callback functions to be executed during tuning.
         prefix (str): Prefix string for logging messages.
         mongodb (MongoClient): Optional MongoDB client for distributed tuning.
         collection (Collection): MongoDB collection for storing tuning results.
@@ -78,15 +78,15 @@ class Tuner:
         >>> )
 
         Tune with custom search space:
-        >>> model.tune(space={"lr0": (1e-5, 1e-1), "momentum": (0.6, 0.98)})
+        >>> model.tune(space={"lr0": (1e-5, 1e-2), "momentum": (0.7, 0.98)})
     """
 
-    def __init__(self, args=DEFAULT_CFG, _callbacks: list | None = None):
+    def __init__(self, args=DEFAULT_CFG, _callbacks: dict | None = None):
         """Initialize the Tuner with configurations.
 
         Args:
             args (dict): Configuration for hyperparameter evolution.
-            _callbacks (list | None, optional): Callback functions to be executed during tuning.
+            _callbacks (dict | None, optional): Callback functions to be executed during tuning.
         """
         self.space = args.pop("space", None) or {  # key: (min, max, gain(optional))
             # 'optimizer': tune.choice(['SGD', 'Adam', 'AdamW', 'NAdam', 'RAdam', 'RMSProp']),

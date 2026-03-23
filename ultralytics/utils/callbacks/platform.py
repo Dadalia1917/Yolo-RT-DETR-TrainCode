@@ -51,7 +51,7 @@ def resolve_platform_uri(uri, hard=True):
 
     Args:
         uri (str): Platform URI starting with "ul://".
-        hard (bool): Whether to raise an error if resolution fails (FileNotFoundError only).
+        hard (bool): Whether to raise an error if resolution fails.
 
     Returns:
         (str | None): Signed URL on success, None if not found and hard=False.
@@ -121,7 +121,7 @@ def resolve_platform_uri(uri, hard=True):
 
 
 def _interp_plot(plot, n=101):
-    """Interpolate plot curve data from 1000 to n points to reduce storage size."""
+    """Interpolate plot curve data to n points to reduce storage size."""
     import numpy as np
 
     if not plot.get("x") or not plot.get("y"):
@@ -163,7 +163,11 @@ def _send(event, data, project, name, model_id=None, retry=2):
             timeout=30,
         )
         if 400 <= r.status_code < 500 and r.status_code not in {408, 429}:
-            LOGGER.warning(f"{PREFIX}Failed to send {event}: {r.status_code} {r.reason}")
+            try:
+                msg = r.json().get("error", r.reason)
+            except Exception:
+                msg = r.reason
+            LOGGER.warning(f"{PREFIX}{msg}")
             return None  # Don't retry client errors (except 408 timeout, 429 rate limit)
         r.raise_for_status()
         return r.json()
@@ -180,7 +184,7 @@ def _send_async(event, data, project, name, model_id=None):
     _executor.submit(_send, event, data, project, name, model_id)
 
 
-def _upload_model(model_path, project, name, progress=False, retry=1):
+def _upload_model(model_path, project, name, progress=False, retry=1, model_id=None):
     """Upload model checkpoint to Platform via signed URL."""
     from ultralytics.utils.uploads import safe_upload
 
@@ -192,9 +196,12 @@ def _upload_model(model_path, project, name, progress=False, retry=1):
     # Get signed upload URL from Platform (server sanitizes filename for storage safety)
     @Retry(times=3, delay=2)
     def get_signed_url():
+        payload = {"project": project, "name": name, "filename": model_path.name}
+        if model_id:
+            payload["modelId"] = model_id  # Direct lookup avoids slug mismatch from auto-increment
         r = requests.post(
             f"{PLATFORM_API_URL}/models/upload",
-            json={"project": project, "name": name, "filename": model_path.name},
+            json=payload,
             headers={"Authorization": f"Bearer {_api_key}"},
             timeout=30,
         )
@@ -213,9 +220,9 @@ def _upload_model(model_path, project, name, progress=False, retry=1):
     return None
 
 
-def _upload_model_async(model_path, project, name):
+def _upload_model_async(model_path, project, name, model_id=None):
     """Upload model asynchronously using bounded thread pool."""
-    _executor.submit(_upload_model, model_path, project, name)
+    _executor.submit(_upload_model, model_path, project, name, model_id=model_id)
 
 
 def _get_environment_info():
@@ -282,13 +289,12 @@ def on_pretrain_routine_start(trainer):
     if RANK not in {-1, 0} or not trainer.args.project:
         return
 
-    # Per-trainer state to isolate concurrent training runs
-    trainer._platform_model_id = None
-    trainer._platform_last_upload = time()
-
     project, name = _get_project_name(trainer)
-    url = f"{PLATFORM_URL}/{project}/{name}"
-    LOGGER.info(f"{PREFIX}Streaming to {url}")
+    LOGGER.info(f"{PREFIX}Streaming training metrics to Platform")
+
+    # Single dict for all platform callback state (like trainer.hub_session for HUB callbacks)
+    ctx = {"model_id": None, "last_upload": time(), "cancelled": False, "console_logger": None, "system_logger": None}
+    trainer.platform = ctx
 
     # Create callback to send console output to Platform
     def send_console_output(content, line_count, chunk_id):
@@ -298,12 +304,12 @@ def on_pretrain_routine_start(trainer):
             {"chunkId": chunk_id, "content": content, "lineCount": line_count},
             project,
             name,
-            getattr(trainer, "_platform_model_id", None),
+            ctx["model_id"],
         )
 
     # Start console capture with batching (5 lines or 5 seconds)
-    trainer._platform_console_logger = ConsoleLogger(batch_size=5, flush_interval=5.0, on_flush=send_console_output)
-    trainer._platform_console_logger.start_capture()
+    ctx["console_logger"] = ConsoleLogger(batch_size=5, flush_interval=5.0, on_flush=send_console_output)
+    ctx["console_logger"].start_capture()
 
     # Collect environment info (W&B-style metadata)
     environment = _get_environment_info()
@@ -326,14 +332,33 @@ def on_pretrain_routine_start(trainer):
         retry=4,
     )
     if response and response.get("modelId"):
-        trainer._platform_model_id = response["modelId"]
+        ctx["model_id"] = response["modelId"]
+        # Server returns actual slug (may differ from requested name due to auto-increment, e.g. "train" → "train-2")
+        if response.get("modelSlug"):
+            ctx["model_slug"] = response["modelSlug"]
+            url = f"{PLATFORM_URL}/{project}/{ctx['model_slug']}"
+            LOGGER.info(f"{PREFIX}View model at {url}")
+        # Check for immediate cancellation (cancelled before training started)
+        # Note: trainer.stop is set in on_pretrain_routine_end (after _setup_train resets it)
+        if response.get("cancelled"):
+            ctx["cancelled"] = True
     else:
-        LOGGER.warning(f"{PREFIX}Failed to register training session - metrics may not sync to Platform")
+        LOGGER.warning(f"{PREFIX}Training will not be tracked on Platform")
+        trainer.platform = None  # Disable further callbacks
+
+
+def on_pretrain_routine_end(trainer):
+    """Apply pre-start cancellation after _setup_train resets trainer.stop."""
+    ctx = getattr(trainer, "platform", None)
+    if ctx and ctx["cancelled"]:
+        LOGGER.info(f"{PREFIX}Training cancelled from Platform before starting ✅")
+        trainer.stop = True
 
 
 def on_fit_epoch_end(trainer):
     """Log training and system metrics at epoch end."""
-    if RANK not in {-1, 0} or not trainer.args.project:
+    ctx = getattr(trainer, "platform", None)
+    if not ctx or RANK not in {-1, 0} or not trainer.args.project:
         return
 
     project, name = _get_project_name(trainer)
@@ -355,12 +380,12 @@ def on_fit_epoch_end(trainer):
         except Exception:
             pass
 
-    # Get system metrics (cache SystemLogger on trainer for efficiency)
+    # Get system metrics (cache SystemLogger in platform context for efficiency)
     system = {}
     try:
-        if not hasattr(trainer, "_platform_system_logger"):
-            trainer._platform_system_logger = SystemLogger()
-        system = trainer._platform_system_logger.get_metrics(rates=True)
+        if not ctx["system_logger"]:
+            ctx["system_logger"] = SystemLogger()
+        system = ctx["system_logger"].get_metrics(rates=True)
     except Exception:
         pass
 
@@ -374,22 +399,25 @@ def on_fit_epoch_end(trainer):
     if model_info:
         payload["modelInfo"] = model_info
 
-    _send_async(
-        "epoch_end",
-        payload,
-        project,
-        name,
-        getattr(trainer, "_platform_model_id", None),
-    )
+    def _send_and_check_cancel():
+        """Send epoch_end and check response for cancellation (runs in background thread)."""
+        response = _send("epoch_end", payload, project, name, ctx["model_id"], retry=1)
+        if response and response.get("cancelled"):
+            LOGGER.info(f"{PREFIX}Training cancelled from Platform ✅")
+            trainer.stop = True
+            ctx["cancelled"] = True
+
+    _executor.submit(_send_and_check_cancel)
 
 
 def on_model_save(trainer):
     """Upload model checkpoint (rate limited to every 15 min)."""
-    if RANK not in {-1, 0} or not trainer.args.project:
+    ctx = getattr(trainer, "platform", None)
+    if not ctx or RANK not in {-1, 0} or not trainer.args.project:
         return
 
     # Rate limit to every 15 minutes (900 seconds)
-    if time() - getattr(trainer, "_platform_last_upload", 0) < 900:
+    if time() - ctx["last_upload"] < 900:
         return
 
     model_path = trainer.best if trainer.best and Path(trainer.best).exists() else trainer.last
@@ -397,28 +425,32 @@ def on_model_save(trainer):
         return
 
     project, name = _get_project_name(trainer)
-    _upload_model_async(model_path, project, name)
-    trainer._platform_last_upload = time()
+    _upload_model_async(model_path, project, name, model_id=ctx["model_id"])
+    ctx["last_upload"] = time()
 
 
 def on_train_end(trainer):
     """Log final results, upload best model, and send validation plot data."""
-    if RANK not in {-1, 0} or not trainer.args.project:
+    ctx = getattr(trainer, "platform", None)
+    if not ctx or RANK not in {-1, 0} or not trainer.args.project:
         return
 
     project, name = _get_project_name(trainer)
 
+    if ctx["cancelled"]:
+        LOGGER.info(f"{PREFIX}Uploading partial results for cancelled training")
+
     # Stop console capture
-    if hasattr(trainer, "_platform_console_logger") and trainer._platform_console_logger:
-        trainer._platform_console_logger.stop_capture()
-        trainer._platform_console_logger = None
+    if ctx["console_logger"]:
+        ctx["console_logger"].stop_capture()
+        ctx["console_logger"] = None
 
     # Upload best model (blocking with progress bar to ensure it completes)
     gcs_path = None
     model_size = None
     if trainer.best and Path(trainer.best).exists():
         model_size = Path(trainer.best).stat().st_size
-        gcs_path = _upload_model(trainer.best, project, name, progress=True, retry=3)
+        gcs_path = _upload_model(trainer.best, project, name, progress=True, retry=3, model_id=ctx["model_id"])
         if not gcs_path:
             LOGGER.warning(f"{PREFIX}Model will not be available for download on Platform (upload failed)")
 
@@ -451,16 +483,17 @@ def on_train_end(trainer):
         },
         project,
         name,
-        getattr(trainer, "_platform_model_id", None),
+        ctx["model_id"],
         retry=4,  # Critical, more retries
     )
-    url = f"{PLATFORM_URL}/{project}/{name}"
+    url = f"{PLATFORM_URL}/{project}/{ctx.get('model_slug', name)}"
     LOGGER.info(f"{PREFIX}View results at {url}")
 
 
 callbacks = (
     {
         "on_pretrain_routine_start": on_pretrain_routine_start,
+        "on_pretrain_routine_end": on_pretrain_routine_end,
         "on_fit_epoch_end": on_fit_epoch_end,
         "on_model_save": on_model_save,
         "on_train_end": on_train_end,
