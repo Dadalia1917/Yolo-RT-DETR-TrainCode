@@ -27,7 +27,6 @@ class LetterBox:
 
     def __call__(self, labels=None, image=None):
         """Return updated labels and image with added border."""
-
         if labels is None:
             labels = {}
         img = labels.get("img") if image is None else image
@@ -43,7 +42,7 @@ class LetterBox:
 
         # Compute padding
         ratio = r, r  # width, height ratios
-        new_unpad = int(round(shape[1] * r)), int(round(shape[0] * r))
+        new_unpad = round(shape[1] * r), round(shape[0] * r)
         dw, dh = new_shape[1] - new_unpad[0], new_shape[0] - new_unpad[1]  # wh padding
         if self.auto:  # minimum rectangle
             dw, dh = np.mod(dw, self.stride), np.mod(dh, self.stride)  # wh padding
@@ -58,8 +57,8 @@ class LetterBox:
 
         if shape[::-1] != new_unpad:  # resize
             img = cv2.resize(img, new_unpad, interpolation=cv2.INTER_LINEAR)
-        top, bottom = int(round(dh - 0.1)) if self.center else 0, int(round(dh + 0.1))
-        left, right = int(round(dw - 0.1)) if self.center else 0, int(round(dw + 0.1))
+        top, bottom = round(dh - 0.1) if self.center else 0, round(dh + 0.1)
+        left, right = round(dw - 0.1) if self.center else 0, round(dw + 0.1)
         img = cv2.copyMakeBorder(
             img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(114, 114, 114)
         )  # add border
@@ -76,7 +75,6 @@ class LetterBox:
 
     def _update_labels(self, labels, ratio, padw, padh):
         """Update labels."""
-
         labels["instances"].convert_bbox(format="xyxy")
         labels["instances"].denormalize(*labels["img"].shape[:2][::-1])
         labels["instances"].scale(*ratio)
@@ -86,8 +84,7 @@ class LetterBox:
 
 class Yolov8TFLite:
     def __init__(self, tflite_model, input_image, confidence_thres, iou_thres):
-        """
-        Initializes an instance of the Yolov8TFLite class.
+        """Initializes an instance of the Yolov8TFLite class.
 
         Args:
             tflite_model: Path to the TFLite model.
@@ -95,7 +92,6 @@ class Yolov8TFLite:
             confidence_thres: Confidence threshold for filtering detections.
             iou_thres: IoU (Intersection over Union) threshold for non-maximum suppression.
         """
-
         self.tflite_model = tflite_model
         self.input_image = input_image
         self.confidence_thres = confidence_thres
@@ -108,8 +104,7 @@ class Yolov8TFLite:
         self.color_palette = np.random.uniform(0, 255, size=(len(self.classes), 3))
 
     def draw_detections(self, img, box, score, class_id):
-        """
-        Draws bounding boxes and labels on the input image based on the detected objects.
+        """Draws bounding boxes and labels on the input image based on the detected objects.
 
         Args:
             img: The input image to draw detections on.
@@ -120,7 +115,6 @@ class Yolov8TFLite:
         Returns:
             None
         """
-
         # Extract the coordinates of the bounding box
         x1, y1, w, h = box
 
@@ -153,13 +147,11 @@ class Yolov8TFLite:
         cv2.putText(img, label, (int(label_x), int(label_y)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
 
     def preprocess(self):
-        """
-        Preprocesses the input image before performing inference.
+        """Preprocesses the input image before performing inference.
 
         Returns:
             image_data: Preprocessed image data ready for inference.
         """
-
         # Read the input image using OpenCV
         self.img = cv2.imread(self.input_image)
 
@@ -178,8 +170,7 @@ class Yolov8TFLite:
         return image / 255
 
     def postprocess(self, input_image, output):
-        """
-        Performs post-processing on the model's output to extract bounding boxes, scores, and class IDs.
+        """Performs post-processing on the model's output to extract bounding boxes, scores, and class IDs.
 
         Args:
             input_image (numpy.ndarray): The input image.
@@ -188,7 +179,6 @@ class Yolov8TFLite:
         Returns:
             numpy.ndarray: The input image with detections drawn on it.
         """
-
         boxes = []
         scores = []
         class_ids = []
@@ -227,13 +217,11 @@ class Yolov8TFLite:
         return input_image
 
     def main(self):
-        """
-        Performs inference using a TFLite model and returns the output image with drawn detections.
+        """Performs inference using a TFLite model and returns the output image with drawn detections.
 
         Returns:
             output_img: The output image with drawn detections.
         """
-
         # Create an interpreter for the TFLite model
         interpreter = tflite.Interpreter(model_path=self.tflite_model)
         self.model = interpreter
