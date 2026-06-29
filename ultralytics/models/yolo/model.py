@@ -7,6 +7,7 @@ from typing import Any
 
 import torch
 
+from ultralytics.cfg import get_cfg
 from ultralytics.data.build import load_inference_source
 from ultralytics.engine.model import Model
 from ultralytics.models import yolo
@@ -16,6 +17,7 @@ from ultralytics.nn.tasks import (
     OBBModel,
     PoseModel,
     SegmentationModel,
+    SemanticSegmentationModel,
     WorldModel,
     YOLOEModel,
     YOLOESegModel,
@@ -28,11 +30,12 @@ class YOLO(Model):
 
     This class provides a unified interface for YOLO models, automatically switching to specialized model types
     (YOLOWorld or YOLOE) based on the model filename. It supports various computer vision tasks including object
-    detection, segmentation, classification, pose estimation, and oriented bounding box detection.
+    detection, instance segmentation, semantic segmentation, classification, pose estimation, and oriented bounding box
+    detection.
 
     Attributes:
         model: The loaded YOLO model instance.
-        task: The task type (detect, segment, classify, pose, obb).
+        task: The task type (detect, segment, semantic, classify, pose, obb).
         overrides: Configuration overrides for the model.
 
     Methods:
@@ -114,6 +117,12 @@ class YOLO(Model):
                 "trainer": yolo.obb.OBBTrainer,
                 "validator": yolo.obb.OBBValidator,
                 "predictor": yolo.obb.OBBPredictor,
+            },
+            "semantic": {
+                "model": SemanticSegmentationModel,
+                "trainer": yolo.semantic.SemanticSegmentationTrainer,
+                "validator": yolo.semantic.SemanticSegmentationValidator,
+                "predictor": yolo.semantic.SemanticSegmentationPredictor,
             },
         }
 
@@ -212,7 +221,7 @@ class YOLOE(Model):
         predict: Run prediction on images, videos, directories, streams, etc.
 
     Examples:
-        Load a YOLOE detection model
+        Load a YOLOE segmentation model
         >>> model = YOLOE("yoloe-11s-seg.pt")
 
         Set vocabulary and class names
@@ -352,7 +361,7 @@ class YOLOE(Model):
         self,
         source=None,
         stream: bool = False,
-        visual_prompts: dict[str, list] = {},
+        visual_prompts: dict[str, list] | None = None,
         refer_image=None,
         predictor=yolo.yoloe.YOLOEVPDetectPredictor,
         **kwargs,
@@ -381,6 +390,7 @@ class YOLOE(Model):
             >>> prompts = {"bboxes": [[10, 20, 100, 200]], "cls": ["person"]}
             >>> results = model.predict("path/to/image.jpg", visual_prompts=prompts)
         """
+        visual_prompts = visual_prompts if visual_prompts is not None else {}
         if len(visual_prompts):
             assert "bboxes" in visual_prompts and "cls" in visual_prompts, (
                 f"Expected 'bboxes' and 'cls' in visual prompts, but got {visual_prompts.keys()}"
@@ -390,6 +400,7 @@ class YOLOE(Model):
                 f"{len(visual_prompts['cls'])} respectively"
             )
             if type(self.predictor) is not predictor:
+                args = get_cfg(overrides={**self.overrides, **kwargs})
                 self.predictor = predictor(
                     overrides={
                         "task": self.model.task,
@@ -397,9 +408,9 @@ class YOLOE(Model):
                         "save": False,
                         "verbose": refer_image is None,
                         "batch": 1,
-                        "device": kwargs.get("device", None),
-                        "half": kwargs.get("half", False),
-                        "imgsz": kwargs.get("imgsz", self.overrides.get("imgsz", 640)),
+                        "device": args.device,
+                        "quantize": args.quantize,
+                        "imgsz": args.imgsz,
                     },
                     _callbacks=self.callbacks,
                 )
