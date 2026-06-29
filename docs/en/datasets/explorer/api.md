@@ -150,9 +150,8 @@ Note: This feature uses LLMs, so results are probabilistic and may be inaccurate
 !!! example "Ask AI"
 
     ```python
-    from ultralytics.data.explorer import plot_query_result
-
     from ultralytics import Explorer
+    from ultralytics.data.explorer import plot_query_result
 
     # create an Explorer object
     exp = Explorer(data="coco128.yaml", model="yolo26n.pt")
