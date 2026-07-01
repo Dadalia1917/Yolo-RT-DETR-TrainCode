@@ -31,6 +31,5 @@ if __name__ == '__main__':
                           name='train_rtdetr',
                           workers=10,  # 调整数据加载线程数，匹配14核CPU
                           optimizer='auto',  # 交给Ultralytics按迭代数自动选择MuSGD/AdamW，
-                                              # 而不是强制SGD，让YOLO26用上它自己的官方配方
                           amp=True,  # 启用自动混合精度训练，加速训练并节省显存
                           device=device)  # 指定使用的GPU设备
