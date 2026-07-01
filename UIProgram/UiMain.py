@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Form implementation generated from reading ui file 'D:\U盘备份\毕设\21网络1张金翔 毕业设计\基于RT-DETR的遥感卫星图像目标检测系统\源代码\UIProgram\UiMain.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
@@ -9,7 +7,8 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_MainWindow(object):
+
+class Ui_MainWindow:
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1250, 830)
@@ -281,4 +280,3 @@ class Ui_MainWindow(object):
         self.label_ymax.setFont(QtGui.QFont("楷体", font_size))  # 缩小字体
 
         self.label_3.setText(_translate("MainWindow", "基于RT-DETR的遥感卫星图像目标检测系统"))
-import ui_sources_rc
