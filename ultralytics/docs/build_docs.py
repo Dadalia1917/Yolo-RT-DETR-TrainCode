@@ -40,7 +40,6 @@ except ImportError:
     postprocess_site = None
 
 from build_reference import build_reference_docs
-
 from ultralytics.utils import LINUX, LOGGER, MACOS
 from ultralytics.utils.tqdm import TQDM
 
