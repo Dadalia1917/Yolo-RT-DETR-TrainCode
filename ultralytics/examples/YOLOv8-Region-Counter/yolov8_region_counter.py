@@ -11,7 +11,6 @@ import cv2
 import numpy as np
 from shapely.geometry import Polygon
 from shapely.geometry.point import Point
-
 from ultralytics import YOLO
 from ultralytics.utils.files import increment_path
 from ultralytics.utils.plotting import Annotator, colors
@@ -79,9 +78,8 @@ def mouse_callback(event: int, x: int, y: int, flags: int, param: Any) -> None:
             current_region["offset_y"] = y
 
     # Mouse left button up event
-    elif event == cv2.EVENT_LBUTTONUP:
-        if current_region is not None and current_region["dragging"]:
-            current_region["dragging"] = False
+    elif event == cv2.EVENT_LBUTTONUP and current_region is not None and current_region["dragging"]:
+        current_region["dragging"] = False
 
 
 def run(
