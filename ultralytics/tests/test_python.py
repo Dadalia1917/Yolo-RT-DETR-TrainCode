@@ -78,8 +78,7 @@ def test_predict_txt(tmp_path):
     """Test YOLO predictions with file, directory, and pattern sources listed in a text file."""
     file = tmp_path / "sources_multi_row.txt"
     with open(file, "w") as f:
-        for src in SOURCES_LIST:
-            f.write(f"{src}\n")
+        f.writelines(f"{src}\n" for src in SOURCES_LIST)
     results = YOLO(MODEL)(source=file, imgsz=32)
     assert len(results) == 7  # 1 + 2 + 2 + 2 = 7 images
 
@@ -198,7 +197,7 @@ def test_track_stream(model, tmp_path):
 def test_val(task: str, weight: str, data: str) -> None:
     """Test the validation mode of the YOLO model."""
     model = YOLO(weight)
-    for plots in {True, False}:  # Test both cases i.e. plots=True and plots=False
+    for plots in (True, False):  # Test both cases i.e. plots=True and plots=False
         metrics = model.val(data=data, imgsz=32, plots=plots)
         metrics.to_df()
         metrics.to_csv()
@@ -518,9 +517,8 @@ def test_utils_patches_torch_save(tmp_path):
 
     mock = MagicMock(side_effect=RuntimeError)
 
-    with patch("ultralytics.utils.patches._torch_save", new=mock):
-        with pytest.raises(RuntimeError):
-            torch_save(torch.zeros(1), tmp_path / "test.pt")
+    with patch("ultralytics.utils.patches._torch_save", new=mock), pytest.raises(RuntimeError):
+        torch_save(torch.zeros(1), tmp_path / "test.pt")
 
     assert mock.call_count == 4, "torch_save was not attempted the expected number of times"
 
@@ -685,10 +683,10 @@ def test_yoloe():
     from ultralytics.models.yolo.yoloe import YOLOEVPSegPredictor
 
     # visual-prompts
-    visuals = dict(
-        bboxes=np.array([[221.52, 405.8, 344.98, 857.54], [120, 425, 160, 445]]),
-        cls=np.array([0, 1]),
-    )
+    visuals = {
+        "bboxes": np.array([[221.52, 405.8, 344.98, 857.54], [120, 425, 160, 445]]),
+        "cls": np.array([0, 1]),
+    }
     model.predict(
         SOURCE,
         visual_prompts=visuals,
@@ -716,7 +714,7 @@ def test_yoloe():
     # Train, from scratch
     model = YOLOE("yoloe-11s-seg.yaml")
     model.train(
-        data=dict(train=dict(yolo_data=["coco128-seg.yaml"]), val=dict(yolo_data=["coco128-seg.yaml"])),
+        data={"train": {"yolo_data": ["coco128-seg.yaml"]}, "val": {"yolo_data": ["coco128-seg.yaml"]}},
         epochs=1,
         close_mosaic=1,
         trainer=YOLOESegTrainerFromScratch,
@@ -762,7 +760,7 @@ def test_grayscale(task: str, model: str, data: str, tmp_path) -> None:
     data["channels"] = 1  # add additional channels key for grayscale
     YAML.save(data=data, file=grayscale_data)
     # remove npy files in train/val splits if exists, might be created by previous tests
-    for split in {"train", "val"}:
+    for split in ("train", "val"):
         for npy_file in (Path(data["path"]) / data[split]).glob("*.npy"):
             npy_file.unlink()
 
