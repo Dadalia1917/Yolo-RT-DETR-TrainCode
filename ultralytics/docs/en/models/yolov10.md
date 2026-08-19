@@ -1,4 +1,5 @@
 ---
+title: YOLOv10: NMS-Free Object Detection
 comments: true
 description: Discover YOLOv10 for real-time object detection, eliminating NMS and boosting efficiency. Achieve top performance with a low computational cost.
 keywords: YOLOv10, real-time object detection, NMS-free, deep learning, Tsinghua University, Ultralytics, machine learning, neural networks, performance optimization
@@ -8,7 +9,7 @@ keywords: YOLOv10, real-time object detection, NMS-free, deep learning, Tsinghua
 
 YOLOv10, released in May 2024 and built on the [Ultralytics](https://www.ultralytics.com/) [Python package](https://pypi.org/project/ultralytics/) by researchers at [Tsinghua University](https://www.tsinghua.edu.cn/en/), introduces a new approach to real-time object detection, addressing both the post-processing and model architecture deficiencies found in previous YOLO versions. By eliminating non-maximum suppression (NMS) and optimizing various model components, YOLOv10 achieved excellent performance with significantly reduced computational overhead at its time of release. Its NMS-free end-to-end design pioneered an approach that has been further developed in [YOLO26](yolo26.md).
 
-![YOLOv10 consistent dual assignment for NMS-free training](https://github.com/ultralytics/docs/releases/download/0/yolov10-consistent-dual-assignment.avif)
+![YOLOv10 consistent dual assignment for NMS-free training](https://cdn.jsdelivr.net/gh/ultralytics/assets@main/docs/yolov10-consistent-dual-assignment.avif)
 
 <p align="center">
   <br>
@@ -52,9 +53,6 @@ YOLOv10 comes in various model scales to cater to different application needs:
 - **YOLOv10x**: Extra-large version for maximum accuracy and performance.
 
 ## Performance
-
-<script async src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script defer src="../../javascript/benchmark.js"></script>
 
 <canvas id="modelComparisonChart" width="1024" height="400" active-models='["YOLOv10"]'></canvas>
 
@@ -100,7 +98,7 @@ YOLOv10 has been extensively tested on standard benchmarks like [COCO](../datase
 
 ## Comparisons
 
-![YOLOv10 comparison with SOTA object detectors](https://github.com/ultralytics/docs/releases/download/0/yolov10-comparison-sota-detectors.avif)
+![YOLOv10 comparison with SOTA object detectors](https://cdn.jsdelivr.net/gh/ultralytics/assets@main/docs/yolov10-comparison-sota-detectors.avif)
 
 Compared to other state-of-the-art detectors:
 
@@ -149,9 +147,11 @@ Compared to other state-of-the-art detectors:
         [5]: https://github.com/ultralytics/assets/releases/download/v8.4.0/yolov10l.pt
         [6]: https://github.com/ultralytics/assets/releases/download/v8.4.0/yolov10x.pt
 
+_Params and FLOPs values are for the fused model after `model.fuse()`, which merges Conv and BatchNorm layers and removes the auxiliary one-to-many detection head. Pretrained checkpoints retain the full training architecture and may show higher counts._
+
 ## Usage Examples
 
-For predicting new images with YOLOv10:
+For predicting new images with YOLOv10. Models can also be trained on cloud GPUs through [Ultralytics Platform](https://platform.ultralytics.com):
 
 !!! example
 
@@ -207,9 +207,9 @@ For training YOLOv10 on a custom dataset:
 
 The YOLOv10 model series offers a range of models, each optimized for high-performance [Object Detection](../tasks/detect.md). These models cater to varying computational needs and accuracy requirements, making them versatile for a wide array of applications.
 
-| Model   | Filenames                                                             | Tasks                                  | Inference | Validation | Training | Export |
-| ------- | --------------------------------------------------------------------- | -------------------------------------- | --------- | ---------- | -------- | ------ |
-| YOLOv10 | `yolov10n.pt` `yolov10s.pt` `yolov10m.pt` `yolov10l.pt` `yolov10x.pt` | [Object Detection](../tasks/detect.md) | ✅        | ✅         | ✅       | ✅     |
+| Model   | Filenames                                                             | Tasks                                  | Training | Validation | Inference | Export |
+| ------- | --------------------------------------------------------------------- | -------------------------------------- | -------- | ---------- | --------- | ------ |
+| YOLOv10 | `yolov10n.pt` `yolov10s.pt` `yolov10m.pt` `yolov10l.pt` `yolov10x.pt` | [Object Detection](../tasks/detect.md) | ✅       | ✅         | ✅        | ✅     |
 
 ## Exporting YOLOv10
 
@@ -224,9 +224,8 @@ Due to the new operations introduced with YOLOv10, not all export formats provid
 | [CoreML](../integrations/coreml.md)               | ✅             | ✅                       | Limited to Apple devices.                                                              |
 | [TF SavedModel](../integrations/tf-savedmodel.md) | ✅             | ✅                       | [TensorFlow](https://www.ultralytics.com/glossary/tensorflow)'s standard model format. |
 | [TF GraphDef](../integrations/tf-graphdef.md)     | ✅             | ✅                       | Legacy TensorFlow format.                                                              |
-| [TF Lite](../integrations/tflite.md)              | ✅             | ✅                       | Optimized for mobile and embedded.                                                     |
+| [LiteRT](../integrations/litert.md)               | ✅             | ✅                       | Optimized for mobile, embedded, and browser (LiteRT.js).                               |
 | [TF Edge TPU](../integrations/edge-tpu.md)        | ✅             | ✅                       | Specific to Google's Edge TPU devices.                                                 |
-| [TF.js](../integrations/tfjs.md)                  | ✅             | ✅                       | JavaScript environment for browser use.                                                |
 | [PaddlePaddle](../integrations/paddlepaddle.md)   | ❌             | ❌                       | Popular in China; less global support.                                                 |
 | [NCNN](../integrations/ncnn.md)                   | ✅             | ❌                       | Layer `torch.topk` not exists or registered                                            |
 
@@ -243,13 +242,15 @@ We would like to acknowledge the YOLOv10 authors from [Tsinghua University](http
     === "BibTeX"
 
         ```bibtex
-        @article{THU-MIGyolov10,
+        @inproceedings{wang2024yolov10,
           title={YOLOv10: Real-Time End-to-End Object Detection},
-          author={Ao Wang, Hui Chen, Lihao Liu, et al.},
-          journal={arXiv preprint arXiv:2405.14458},
-          year={2024},
-          institution={Tsinghua University},
-          license = {AGPL-3.0}
+          author={Wang, Ao and Chen, Hui and Liu, Lihao and Chen, Kai and Lin, Zijia and Han, Jungong and Ding, Guiguang},
+          booktitle={Advances in Neural Information Processing Systems},
+          doi = {10.52202/079017-3429},
+          url = {https://proceedings.neurips.cc/paper_files/paper/2024/file/c34ddd05eb089991f06f3c5dc36836e0-Paper-Conference.pdf},
+          volume={37},
+          pages={107984--108011},
+          year={2024}
         }
         ```
 

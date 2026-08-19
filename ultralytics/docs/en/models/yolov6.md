@@ -1,4 +1,5 @@
 ---
+title: Meituan YOLOv6 Detector
 comments: true
 description: Explore Meituan YOLOv6, a top-tier object detector balancing speed and accuracy. Learn about its unique features and performance metrics on Ultralytics Docs.
 keywords: Meituan YOLOv6, object detection, real-time applications, BiC module, Anchor-Aided Training, COCO dataset, high-performance models, Ultralytics Docs
@@ -8,10 +9,10 @@ keywords: Meituan YOLOv6, object detection, real-time applications, BiC module, 
 
 ## Overview
 
-[Meituan](https://www.meituan.com/) YOLOv6, released in 2022, offers a strong balance between speed and accuracy, making it a popular choice for real-time applications. This model introduces several notable enhancements on its architecture and training scheme, including the implementation of a Bi-directional Concatenation (BiC) module, an anchor-aided training (AAT) strategy, and an improved [backbone](https://www.ultralytics.com/glossary/backbone) and neck design for high accuracy on the [COCO dataset](https://docs.ultralytics.com/datasets/detect/coco/).
+[Meituan](https://www.meituan.com/) YOLOv6, released in 2022, offers a strong balance between speed and accuracy, making it a popular choice for real-time applications. This model introduces several notable enhancements on its architecture and training scheme, including the implementation of a Bi-directional Concatenation (BiC) module, an anchor-aided training (AAT) strategy, and an improved [backbone](https://www.ultralytics.com/glossary/backbone) and neck design for high accuracy on the [COCO dataset](../datasets/detect/coco.md).
 
-![Meituan YOLOv6](https://github.com/ultralytics/docs/releases/download/0/meituan-yolov6.avif)
-![Model example image](https://github.com/ultralytics/docs/releases/download/0/yolov6-architecture-diagram.avif) **Overview of YOLOv6.** Model architecture diagram showing the redesigned network components and training strategies that have led to significant performance improvements. (a) The neck of YOLOv6 (N and S are shown). Note for M/L, RepBlocks is replaced with CSPStackRep. (b) The structure of a BiC module. (c) A SimCSPSPPF block. ([source](https://arxiv.org/pdf/2301.05586)).
+![YOLOv6 real-time object detection model by Meituan](https://cdn.jsdelivr.net/gh/ultralytics/assets@main/docs/meituan-yolov6.avif)
+![YOLOv6 model architecture diagram](https://cdn.jsdelivr.net/gh/ultralytics/assets@main/docs/yolov6-architecture-diagram.avif) **Overview of YOLOv6.** Model architecture diagram showing the redesigned network components and training strategies that have led to significant performance improvements. (a) The neck of YOLOv6 (N and S are shown). Note for M/L, RepBlocks is replaced with CSPStackRep. (b) The structure of a BiC module. (c) A SimCSPSPPF block. ([source](https://arxiv.org/pdf/2301.05586)).
 
 ### Key Features
 
@@ -21,9 +22,6 @@ keywords: Meituan YOLOv6, object detection, real-time applications, BiC module, 
 - **Self-Distillation Strategy:** A new self-distillation strategy is implemented to boost the performance of smaller models of YOLOv6, enhancing the auxiliary regression branch during training and removing it at inference to avoid a marked speed decline.
 
 ## Performance Metrics
-
-<script async src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script defer src="../../javascript/benchmark.js"></script>
 
 <canvas id="modelComparisonChart" width="1024" height="400" active-models='["YOLOv6-3.0"]'></canvas>
 
@@ -79,13 +77,13 @@ This example provides simple YOLOv6 training and inference examples. For full do
 
 The YOLOv6 series offers a range of models, each optimized for high-performance [Object Detection](../tasks/detect.md). These models cater to varying computational needs and [accuracy](https://www.ultralytics.com/glossary/accuracy) requirements, making them versatile for a wide array of applications.
 
-| Model    | Filenames      | Tasks                                  | Inference | Validation | Training | Export |
-| -------- | -------------- | -------------------------------------- | --------- | ---------- | -------- | ------ |
-| YOLOv6-N | `yolov6n.yaml` | [Object Detection](../tasks/detect.md) | ✅        | ✅         | ✅       | ✅     |
-| YOLOv6-S | `yolov6s.yaml` | [Object Detection](../tasks/detect.md) | ✅        | ✅         | ✅       | ✅     |
-| YOLOv6-M | `yolov6m.yaml` | [Object Detection](../tasks/detect.md) | ✅        | ✅         | ✅       | ✅     |
-| YOLOv6-L | `yolov6l.yaml` | [Object Detection](../tasks/detect.md) | ✅        | ✅         | ✅       | ✅     |
-| YOLOv6-X | `yolov6x.yaml` | [Object Detection](../tasks/detect.md) | ✅        | ✅         | ✅       | ✅     |
+| Model    | Filenames      | Tasks                                  | Training | Validation | Inference | Export |
+| -------- | -------------- | -------------------------------------- | -------- | ---------- | --------- | ------ |
+| YOLOv6-N | `yolov6n.yaml` | [Object Detection](../tasks/detect.md) | ✅       | ✅         | ✅        | ✅     |
+| YOLOv6-S | `yolov6s.yaml` | [Object Detection](../tasks/detect.md) | ✅       | ✅         | ✅        | ✅     |
+| YOLOv6-M | `yolov6m.yaml` | [Object Detection](../tasks/detect.md) | ✅       | ✅         | ✅        | ✅     |
+| YOLOv6-L | `yolov6l.yaml` | [Object Detection](../tasks/detect.md) | ✅       | ✅         | ✅        | ✅     |
+| YOLOv6-X | `yolov6x.yaml` | [Object Detection](../tasks/detect.md) | ✅       | ✅         | ✅        | ✅     |
 
 This table provides a detailed overview of the YOLOv6 model variants, highlighting their capabilities in [object detection](https://www.ultralytics.com/glossary/object-detection) tasks and their compatibility with various operational modes such as [Inference](../modes/predict.md), [Validation](../modes/val.md), [Training](../modes/train.md), and [Export](../modes/export.md). This comprehensive support ensures that users can fully leverage the capabilities of YOLOv6 models in a broad range of object detection scenarios.
 

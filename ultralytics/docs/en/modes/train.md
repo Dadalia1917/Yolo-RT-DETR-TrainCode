@@ -1,16 +1,16 @@
 ---
 comments: true
 description: Learn how to efficiently train object detection models using YOLO26 with comprehensive instructions on settings, augmentation, and hardware utilization.
-keywords: Ultralytics, YOLO26, model training, deep learning, object detection, GPU training, dataset augmentation, hyperparameter tuning, model performance, apple silicon training
+keywords: Ultralytics, YOLO26, model training, deep learning, object detection, GPU training, AMD ROCm, Huawei Ascend NPU, dataset augmentation, hyperparameter tuning, model performance, apple silicon training
 ---
 
 # Model Training with Ultralytics YOLO
 
-<img width="1024" src="https://github.com/ultralytics/docs/releases/download/0/ultralytics-yolov8-ecosystem-integrations.avif" alt="Ultralytics YOLO ecosystem and integrations">
+<img width="1024" src="https://cdn.jsdelivr.net/gh/ultralytics/assets@main/docs/ultralytics-yolov8-ecosystem-integrations.avif" alt="Ultralytics YOLO ecosystem and integrations">
 
 ## Introduction
 
-Training a [deep learning](https://www.ultralytics.com/glossary/deep-learning-dl) model involves feeding it data and adjusting its parameters so that it can make accurate predictions. Train mode in Ultralytics YOLO26 is engineered for effective and efficient training of object detection models, fully utilizing modern hardware capabilities. This guide aims to cover all the details you need to get started with training your own models using YOLO26's robust set of features.
+Training a [deep learning](https://www.ultralytics.com/glossary/deep-learning-dl) model involves feeding it data and adjusting its parameters so that it can make accurate predictions. Train mode in Ultralytics YOLO26 is engineered for effective and efficient training of object detection models, fully utilizing modern hardware capabilities. This guide aims to cover all the details you need to get started with training your own models using YOLO26's robust set of features. If you haven't installed Ultralytics yet, start with the [Quickstart guide](../quickstart.md).
 
 <p align="center">
   <br>
@@ -30,20 +30,17 @@ Here are some compelling reasons to opt for YOLO26's Train mode:
 - **Efficiency:** Make the most out of your hardware, whether you're on a single-GPU setup or scaling across multiple GPUs.
 - **Versatility:** Train on custom datasets in addition to readily available ones like COCO, VOC, and ImageNet.
 - **User-Friendly:** Simple yet powerful CLI and Python interfaces for a straightforward training experience.
-- **Hyperparameter Flexibility:** A broad range of customizable hyperparameters to fine-tune model performance.
+- **Hyperparameter Flexibility:** A broad range of customizable hyperparameters to fine-tune model performance. For deeper control, you can [customize the trainer](../guides/custom-trainer.md) itself.
+- **Cloud Training:** Train on cloud GPUs through [Ultralytics Platform](../platform/train/cloud-training.md) with real-time metrics and automatic checkpointing.
 
 ### Key Features of Train Mode
 
 The following are some notable features of YOLO26's Train mode:
 
-- **Automatic Dataset Download:** Standard datasets like COCO, VOC, and ImageNet are downloaded automatically on first use.
+- **Automatic Dataset Download:** Dataset configurations with a download source are downloaded automatically on first use, e.g., `yolo train data=coco8.yaml`. See the [Datasets overview](../datasets/index.md) for supported formats and datasets.
 - **Multi-GPU Support:** Scale your training efforts seamlessly across multiple GPUs to expedite the process.
 - **Hyperparameter Configuration:** The option to modify hyperparameters through YAML configuration files or CLI arguments.
 - **Visualization and Monitoring:** Real-time tracking of training metrics and visualization of the learning process for better insights.
-
-!!! tip
-
-    * YOLO26 datasets like COCO, VOC, ImageNet, and many others automatically download on first use, i.e., `yolo train data=coco.yaml`
 
 ## Usage Examples
 
@@ -116,6 +113,63 @@ Multi-GPU training allows for more efficient utilization of available hardware r
         # Use the two most idle GPUs
         yolo detect train data=coco8.yaml model=yolo26n.pt epochs=100 imgsz=640 device=-1,-1
         ```
+
+!!! note "Multi-GPU Training with Custom Code"
+
+    When you specify multiple devices (e.g., `device=[0, 1]`), Ultralytics internally spawns a new trainer instance and executes `torch.distributed.run` under the hood. This works seamlessly for standard CLI usage and unmodified Python scripts.
+
+    However, if your script contains custom components—such as a custom trainer, validator, dataset, or augmentation pipeline—these objects cannot be automatically serialized and transferred to the DDP subprocesses. In this case, you must launch your script directly with `torch.distributed.run`:
+
+    ```bash
+    python -m torch.distributed.run --nproc_per_node 2 your_training_script.py
+    ```
+
+AMD GPU training uses a PyTorch ROCm build with the standard `device=0` or `device=cuda:0` syntax. See the
+[AMD integration guide](../integrations/amd.md) for installation and the current MIGraphX, DirectML, and Ryzen AI NPU
+support status.
+
+Intel GPU training uses `device=xpu:0`, or multiple XPU IDs with a PyTorch build that provides XCCL.
+
+### Huawei Ascend NPU Training
+
+Ultralytics supports training and validation on Huawei Ascend NPUs through
+[`torch_npu`](https://github.com/Ascend/pytorch). Install mutually compatible CANN, PyTorch, and `torch_npu`
+versions by following the [Ascend Extension for PyTorch installation guide](https://github.com/Ascend/pytorch#installation),
+then source the CANN environment before starting Ultralytics:
+
+```bash
+source /usr/local/Ascend/ascend-toolkit/set_env.sh
+```
+
+!!! example "Ascend NPU Training Example"
+
+    === "Python"
+
+        ```python
+        from ultralytics import YOLO
+
+        model = YOLO("yolo26n.pt")
+
+        # Train on one Ascend NPU
+        results = model.train(data="coco8.yaml", epochs=100, imgsz=640, device="npu:0")
+
+        # Train across two Ascend NPUs with HCCL
+        results = model.train(data="coco8.yaml", epochs=100, imgsz=640, device="npu:0,1")
+        ```
+
+    === "CLI"
+
+        ```bash
+        # Train on one Ascend NPU
+        yolo detect train data=coco8.yaml model=yolo26n.pt epochs=100 imgsz=640 device=npu:0
+
+        # Train across two Ascend NPUs with HCCL
+        yolo detect train data=coco8.yaml model=yolo26n.pt epochs=100 imgsz=640 device=npu:0,1
+        ```
+
+The standard training features, including AMP, validation, checkpointing, and resume, use the active NPU. AutoBatch is
+available for single-NPU training, while multiple NPU IDs launch distributed training through HCCL. See the
+[Huawei Ascend integration guide](../integrations/ascend.md) for model export and deployment after training.
 
 ### Idle GPU Training
 
@@ -226,6 +280,24 @@ Remember that checkpoints are saved at the end of every epoch by default, or at 
 
 The training settings for YOLO models encompass various hyperparameters and configurations used during the training process. These settings influence the model's performance, speed, and [accuracy](https://www.ultralytics.com/glossary/accuracy). Key training settings include batch size, learning rate, momentum, and weight decay. Additionally, the choice of optimizer, [loss function](https://www.ultralytics.com/glossary/loss-function), and training dataset composition can impact the training process. Careful tuning and experimentation with these settings are crucial for optimizing performance.
 
+### MuSGD Optimizer
+
+In YOLO26, **MuSGD** is a hybrid optimizer that combines standard **SGD** updates with **Muon-style orthogonalized updates**.
+
+It is **recommended for longer YOLO26 training runs and larger datasets**, where orthogonalized Muon updates can help stabilize optimization.
+
+Only 2D linear weights and 4D convolutional filters (reshaped to 2D) receive the Muon style update together with SGD, while all other parameters, such as batch normalization weights and bias terms, remain on standard SGD.
+
+When `optimizer=auto` is used, Ultralytics automatically selects **MuSGD** for longer training runs (typically when iterations > 10000). For shorter runs, the trainer falls back to **AdamW**.
+
+Example usage:
+
+```bash
+yolo train model=yolo26n.pt data=coco8.yaml optimizer=MuSGD
+```
+
+See the implementation in `ultralytics/optim/muon.py` and the optimizer auto-selection logic in `BaseTrainer.build_optimizer`.
+
 {% include "macros/train-args.md" %}
 
 !!! info "Note on Batch-size Settings"
@@ -235,6 +307,7 @@ The training settings for YOLO models encompass various hyperparameters and conf
     - **Fixed [Batch Size](https://www.ultralytics.com/glossary/batch-size)**: Set an integer value (e.g., `batch=16`), specifying the number of images per batch directly.
     - **Auto Mode (60% GPU Memory)**: Use `batch=-1` to automatically adjust batch size for approximately 60% CUDA memory utilization.
     - **Auto Mode with Utilization Fraction**: Set a fraction value (e.g., `batch=0.70`) to adjust batch size based on the specified fraction of GPU memory usage.
+    - **OOM Auto-Retry**: If a CUDA out-of-memory error occurs during the first epoch, the trainer automatically halves the batch size and retries (up to 3 times). This only applies to single-GPU training; multi-GPU (DDP) training will raise the error immediately.
 
 ## Augmentation Settings and Hyperparameters
 
@@ -307,7 +380,7 @@ To use TensorBoard in [Google Colab](https://colab.research.google.com/github/ul
         tensorboard --logdir ultralytics/runs # replace with 'runs' directory
         ```
 
-To use TensorBoard locally run the below command and view results at `http://localhost:6006/`.
+To use TensorBoard locally run the below command and view results at `localhost:6006`.
 
 !!! example
 
@@ -321,7 +394,15 @@ This will load TensorBoard and direct it to the directory where your training lo
 
 After setting up your logger, you can then proceed with your model training. All training metrics will be automatically logged in your chosen platform, and you can access these logs to monitor your model's performance over time, compare different models, and identify areas for improvement.
 
+## What's Next
+
+[Validate](val.md) your trained model against held-out data to check its real-world accuracy, then [export](export.md) it to ONNX, TensorRT, or another deployment format. Training on your own data instead of COCO8? Format it first with the [Datasets guide](../datasets/index.md).
+
 ## FAQ
+
+### Can I train without a local GPU?
+
+Yes. [Ultralytics Platform cloud training](../platform/train/cloud-training.md) includes free credits to get started. Upload your dataset, select a model and GPU, and train directly from the browser.
 
 ### How do I train an [object detection](https://www.ultralytics.com/glossary/object-detection) model using Ultralytics YOLO26?
 
@@ -386,6 +467,49 @@ To resume training from an interrupted session, set the `resume` argument to `Tr
 
 Check the section on [Resuming Interrupted Trainings](#resuming-interrupted-trainings) for more information.
 
+### How do I train a model on an imbalanced dataset?
+
+Class imbalance occurs when some classes have significantly fewer examples than others in your training data. This can cause the model to perform poorly on rare classes. Ultralytics YOLO supports class weighting through the `cls_pw` argument to address this issue.
+
+The `cls_pw` argument controls class weighting power based on inverse class frequency:
+
+- `cls_pw=0.0` (default): Disables class weighting
+- `cls_pw=1.0`: Applies full inverse frequency weighting
+- Values between `0.0` and `1.0`: Provide partial weighting for moderate imbalance
+
+The class weights are computed as `(1.0 / class_counts) ^ cls_pw` and normalized so their mean equals 1.0.
+
+!!! example "Training on Imbalanced Dataset"
+
+    === "Python"
+
+        ```python
+        from ultralytics import YOLO
+
+        # Load a pretrained model
+        model = YOLO("yolo26n.pt")
+
+        # Train with full class weighting for severely imbalanced data
+        results = model.train(data="custom.yaml", epochs=100, imgsz=640, cls_pw=1.0)
+
+        # Or use partial weighting (0.25) for moderate imbalance
+        results = model.train(data="custom.yaml", epochs=100, imgsz=640, cls_pw=0.25)
+        ```
+
+    === "CLI"
+
+        ```bash
+        # Train with full inverse frequency weighting
+        yolo detect train data=custom.yaml model=yolo26n.pt epochs=100 imgsz=640 cls_pw=1.0
+
+        # Train with partial weighting for moderate imbalance
+        yolo detect train data=custom.yaml model=yolo26n.pt epochs=100 imgsz=640 cls_pw=0.25
+        ```
+
+!!! tip
+
+    Start with `cls_pw=0.25` for moderately imbalanced datasets and increase to `1.0` if the rare classes still underperform. You can check the computed class weights in the training logs to verify the weight distribution.
+
 ### Can I train YOLO26 models on Apple silicon chips?
 
 Yes, Ultralytics YOLO26 supports training on Apple silicon chips utilizing the Metal Performance Shaders (MPS) framework. Specify 'mps' as your training device.
@@ -416,14 +540,14 @@ For more details, refer to the [Apple Silicon MPS Training](#apple-silicon-mps-t
 
 Ultralytics YOLO26 allows you to configure a variety of training settings such as batch size, learning rate, epochs, and more through arguments. Here's a brief overview:
 
-| Argument | Default | Description                                                            |
-| -------- | ------- | ---------------------------------------------------------------------- |
-| `model`  | `None`  | Path to the model file for training.                                   |
-| `data`   | `None`  | Path to the dataset configuration file (e.g., `coco8.yaml`).           |
-| `epochs` | `100`   | Total number of training epochs.                                       |
-| `batch`  | `16`    | Batch size, adjustable as integer or auto mode.                        |
-| `imgsz`  | `640`   | Target image size for training.                                        |
-| `device` | `None`  | Computational device(s) for training like `cpu`, `0`, `0,1`, or `mps`. |
-| `save`   | `True`  | Enables saving of training checkpoints and final model weights.        |
+| Argument | Default | Description                                                                                                            |
+| -------- | ------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `model`  | `None`  | Path to the model file for training.                                                                                   |
+| `data`   | `None`  | Path to the dataset YAML (e.g., `coco8.yaml`), or a dataset directory or name (e.g., `imagenet10`) for classification. |
+| `epochs` | `100`   | Total number of training epochs.                                                                                       |
+| `batch`  | `16`    | Batch size, adjustable as integer or auto mode.                                                                        |
+| `imgsz`  | `640`   | Target image size for training.                                                                                        |
+| `device` | `None`  | Computational device(s) for training like `cpu`, `0`, `0,1`, or `mps`.                                                 |
+| `save`   | `True`  | Enables saving of training checkpoints and final model weights.                                                        |
 
 For an in-depth guide on training settings, check the [Train Settings](#train-settings) section.
