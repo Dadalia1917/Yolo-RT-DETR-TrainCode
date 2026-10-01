@@ -1,7 +1,7 @@
-from ultralytics import RTDETR
 import cv2
 import matplotlib.pyplot as plt
 
+from ultralytics import RTDETR
 
 model = RTDETR("runs/detect/train_rtdetr_x/weights/best.pt")
 
@@ -32,7 +32,7 @@ if detections is not None:
 
 # 显示结果图像
 plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-plt.axis('off')
+plt.axis("off")
 plt.show()
 
 # 保存结果图像
