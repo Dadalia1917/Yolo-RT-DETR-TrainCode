@@ -27,14 +27,14 @@
 
 ### 支持的模型
 
-| 模型系列 | 版本 | 说明 |
-|---------|------|------|
+| 模型系列      | 版本      | 说明                             |
+| ------------- | --------- | -------------------------------- |
 | **YOLO26** ⭐ | n/s/m/l/x | 最新一代 YOLO 模型，**推荐使用** |
-| RT-DETR | L/X | 基于 Transformer 的实时检测器 |
-| YOLOv5 | n/s/m/l/x | 经典稳定版本，生态成熟 |
-| YOLOv8 | n/s/m/l/x | 经典 YOLO 版本 |
-| YOLOv11 | n/s/m/l/x | YOLO v11 系列 |
-| YOLOv12 | n/s/m/l/x | YOLO v12 系列 |
+| RT-DETR       | L/X       | 基于 Transformer 的实时检测器    |
+| YOLOv5        | n/s/m/l/x | 经典稳定版本，生态成熟           |
+| YOLOv8        | n/s/m/l/x | 经典 YOLO 版本                   |
+| YOLOv11       | n/s/m/l/x | YOLO v11 系列                    |
+| YOLOv12       | n/s/m/l/x | YOLO v12 系列                    |
 
 ## ✨ YOLO26 主要特性
 
@@ -47,13 +47,13 @@ YOLO26 是 Ultralytics 推出的最新一代目标检测模型，相比之前版
 
 ### YOLO26 性能对比
 
-| 模型 | 尺寸 | mAP<sup>val</sup> | CPU (ms) | TensorRT (ms) | 参数量 (M) | FLOPs (B) |
-|------|------|-------------------|----------|---------------|-----------|-----------|
-| YOLO26n | 640 | **40.9** | 38.9 | **1.7** | 2.4 | 5.4 |
-| YOLO26s | 640 | **48.6** | 87.2 | 2.5 | 9.5 | 20.7 |
-| YOLO26m | 640 | **53.1** | 220.0 | 4.7 | 20.4 | 68.2 |
-| YOLO26l | 640 | **55.0** | 286.2 | 6.2 | 24.8 | 86.4 |
-| YOLO26x | 640 | **57.5** | 525.8 | 11.8 | 55.7 | 193.9 |
+| 模型    | 尺寸 | mAP<sup>val</sup> | CPU (ms) | TensorRT (ms) | 参数量 (M) | FLOPs (B) |
+| ------- | ---- | ----------------- | -------- | ------------- | ---------- | --------- |
+| YOLO26n | 640  | **40.9**          | 38.9     | **1.7**       | 2.4        | 5.4       |
+| YOLO26s | 640  | **48.6**          | 87.2     | 2.5           | 9.5        | 20.7      |
+| YOLO26m | 640  | **53.1**          | 220.0    | 4.7           | 20.4       | 68.2      |
+| YOLO26l | 640  | **55.0**          | 286.2    | 6.2           | 24.8       | 86.4      |
+| YOLO26x | 640  | **57.5**          | 525.8    | 11.8          | 55.7       | 193.9     |
 
 ## 🔥 YOLOv5 模型介绍
 
@@ -68,13 +68,13 @@ YOLOv5 是 Ultralytics 推出的经典目标检测模型，以其稳定性和易
 
 ### YOLOv5 性能对比（COCO 数据集）
 
-| 模型 | 尺寸 | mAP<sup>val</sup> | CPU Speed (ms) | GPU Speed (ms) | 参数量 (M) | FLOPs (B) |
-|------|------|-------------------|----------------|----------------|------------|-----------|
-| YOLOv5n | 640 | 28.0 | 45.0 | 1.3 | 1.9 | 4.5 |
-| YOLOv5s | 640 | 37.4 | 98.0 | 2.1 | 7.2 | 16.5 |
-| YOLOv5m | 640 | 45.4 | 224.0 | 3.8 | 21.2 | 49.0 |
-| YOLOv5l | 640 | 49.0 | 430.0 | 5.4 | 46.5 | 109.1 |
-| YOLOv5x | 640 | 50.7 | 766.0 | 8.2 | 86.7 | 205.7 |
+| 模型    | 尺寸 | mAP<sup>val</sup> | CPU Speed (ms) | GPU Speed (ms) | 参数量 (M) | FLOPs (B) |
+| ------- | ---- | ----------------- | -------------- | -------------- | ---------- | --------- |
+| YOLOv5n | 640  | 28.0              | 45.0           | 1.3            | 1.9        | 4.5       |
+| YOLOv5s | 640  | 37.4              | 98.0           | 2.1            | 7.2        | 16.5      |
+| YOLOv5m | 640  | 45.4              | 224.0          | 3.8            | 21.2       | 49.0      |
+| YOLOv5l | 640  | 49.0              | 430.0          | 5.4            | 46.5       | 109.1     |
+| YOLOv5x | 640  | 50.7              | 766.0          | 8.2            | 86.7       | 205.7     |
 
 ### YOLOv5 适用场景
 
@@ -166,10 +166,11 @@ python train_v13.py
 
 ```python
 import os
+
 # 使用 GPU 0
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 # 或使用 GPU 1
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 ```
 
 使用 `check_gpu.py` 工具查看系统中的 GPU 信息：
@@ -208,23 +209,23 @@ python check_gpu.py
 
 ```python
 results = model.train(
-    data='datasets/Data/data.yaml',  # 数据集配置
-    epochs=300,                       # 训练轮数
-    imgsz=640,                        # 输入图像尺寸
-    batch=16,                         # 批次大小
-    optimizer='SGD',                  # 优化器（推荐 SGD）
-    amp=True,                         # 自动混合精度训练
-    device=device                       # 使用的 GPU
+    data="datasets/Data/data.yaml",  # 数据集配置
+    epochs=300,  # 训练轮数
+    imgsz=640,  # 输入图像尺寸
+    batch=16,  # 批次大小
+    optimizer="SGD",  # 优化器（推荐 SGD）
+    amp=True,  # 自动混合精度训练
+    device=device,  # 使用的 GPU
 )
 ```
 
 ### 训练优化
 
-| 参数 | 推荐值 | 说明 |
-|------|--------|------|
-| optimizer | `SGD` | SGD 在目标检测任务中通常比 Adam 获得更高精度 |
-| amp | `True` | 自动混合精度可加速训练 1.5-2 倍，节省 40-50% 显存 |
-| batch | 16 | 根据 GPU 显存调整，16GB 显存推荐 16 |
+| 参数      | 推荐值 | 说明                                              |
+| --------- | ------ | ------------------------------------------------- |
+| optimizer | `SGD`  | SGD 在目标检测任务中通常比 Adam 获得更高精度      |
+| amp       | `True` | 自动混合精度可加速训练 1.5-2 倍，节省 40-50% 显存 |
+| batch     | 16     | 根据 GPU 显存调整，16GB 显存推荐 16               |
 
 ## 📊 模型导出
 
@@ -233,13 +234,13 @@ results = model.train(
 ```python
 from ultralytics import YOLO
 
-model = YOLO('runs/detect/train_v26/weights/best.pt')
+model = YOLO("runs/detect/train_v26/weights/best.pt")
 
 # 导出为 ONNX
-model.export(format='onnx')
+model.export(format="onnx")
 
 # 导出为 TensorRT (需要 TensorRT 环境)
-model.export(format='engine')
+model.export(format="engine")
 ```
 
 ## 🔗 相关链接
