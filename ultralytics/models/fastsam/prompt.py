@@ -13,8 +13,7 @@ from ultralytics.utils import TQDM
 
 
 class FastSAMPrompt:
-    """
-    Fast Segment Anything Model class for image annotation and visualization.
+    """Fast Segment Anything Model class for image annotation and visualization.
 
     Attributes:
         device (str): Computing device ('cuda' or 'cpu').
@@ -77,11 +76,10 @@ class FastSAMPrompt:
 
     @staticmethod
     def _get_bbox_from_mask(mask):
-        """Applies morphological transformations to the mask, displays it, and if with_contours is True, draws
-        contours.
+        """Applies morphological transformations to the mask, displays it, and if with_contours is True, draws contours.
         """
         mask = mask.astype(np.uint8)
-        contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         x1, y1, w, h = cv2.boundingRect(contours[0])
         x2, y2 = x1 + w, y1 + h
         if len(contours) > 1:
@@ -105,8 +103,7 @@ class FastSAMPrompt:
         retina=False,
         with_contours=True,
     ):
-        """
-        Plots annotations, bounding boxes, and points on images and saves the output.
+        """Plots annotations, bounding boxes, and points on images and saves the output.
 
         Args:
             annotations (list): Annotations to be plotted.
@@ -115,7 +112,8 @@ class FastSAMPrompt:
             points (list, optional): Points to be plotted. Defaults to None.
             point_label (list, optional): Labels for the points. Defaults to None.
             mask_random_color (bool, optional): Whether to use random color for masks. Defaults to True.
-            better_quality (bool, optional): Whether to apply morphological transformations for better mask quality. Defaults to True.
+            better_quality (bool, optional): Whether to apply morphological transformations for better mask quality.
+                Defaults to True.
             retina (bool, optional): Whether to use retina mask. Defaults to False.
             with_contours (bool, optional): Whether to plot contours. Defaults to True.
         """
@@ -189,8 +187,7 @@ class FastSAMPrompt:
         target_height=960,
         target_width=960,
     ):
-        """
-        Quickly shows the mask annotations on the given matplotlib axis.
+        """Quickly shows the mask annotations on the given matplotlib axis.
 
         Args:
             annotation (array-like): Mask annotation.
@@ -343,7 +340,7 @@ class FastSAMPrompt:
         """Processes a text prompt, applies it to existing results and returns the updated results."""
         if self.results[0].masks is not None:
             format_results = self._format_results(self.results[0], 0)
-            cropped_boxes, cropped_images, not_crop, filter_id, annotations = self._crop_image(format_results)
+            cropped_boxes, _cropped_images, _not_crop, filter_id, annotations = self._crop_image(format_results)
             clip_model, preprocess = self.clip.load("ViT-B/32", device=self.device)
             scores = self.retrieve(clip_model, preprocess, cropped_boxes, text, device=self.device)
             max_idx = scores.argsort()
