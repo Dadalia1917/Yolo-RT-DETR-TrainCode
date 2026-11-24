@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # 进度条
-from PyQt5.QtWidgets import QDialog, QLabel, QProgressBar, QPushButton, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QDialog, QHBoxLayout, QLabel, QProgressBar, QPushButton, QVBoxLayout
 
 
 class ProgressBar(QDialog):
     def __init__(self, parent=None):
-        super(ProgressBar, self).__init__(parent)
+        super().__init__(parent)
 
         self.resize(350, 100)
         self.setWindowTitle(self.tr("视频保存进度信息"))
@@ -25,7 +24,7 @@ class ProgressBar(QDialog):
         FeatLayout.addWidget(self.FeatLabel)
         FeatLayout.addWidget(self.FeatProgressBar)
 
-        self.cancelButton = QPushButton('取消保存', self)
+        self.cancelButton = QPushButton("取消保存", self)
 
         buttonlayout = QHBoxLayout()
         buttonlayout.addStretch(1)
