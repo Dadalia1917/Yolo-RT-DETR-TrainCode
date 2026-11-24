@@ -793,8 +793,8 @@ class Model(torch.nn.Module):
         Returns:
             (ultralytics.utils.metrics.DetMetrics | dict | None): Training metrics if available and training is
                 successful; otherwise, None. The specific metrics type depends on the task. When `data` is a list or
-                tuple of datasets, the base model is fine-tuned on each in series and a {dataset: metrics} dict is
-                returned.
+                tuple of datasets, the base model is fine-tuned on each in series and a {dataset: metrics} dict
+                is returned.
 
         Examples:
             >>> model = YOLO("yolo26n.pt")
@@ -1083,7 +1083,7 @@ class Model(torch.nn.Module):
             >>> model.reset_callbacks()
             # All callbacks are now reset to their default functions
         """
-        for event in callbacks.default_callbacks.keys():
+        for event in callbacks.default_callbacks:
             self.callbacks[event] = [callbacks.default_callbacks[event][0]]
 
     @staticmethod

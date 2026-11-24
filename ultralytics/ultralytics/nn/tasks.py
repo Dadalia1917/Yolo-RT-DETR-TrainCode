@@ -1673,7 +1673,7 @@ class _SafeLoad:
         import torch.nn.modules as torch_nn
 
         import ultralytics.nn.modules as ul_nn
-        from ultralytics.nn import tasks as ul_tasks  # noqa: PLW0406
+        from ultralytics.nn import tasks as ul_tasks
 
         allow = []
 
